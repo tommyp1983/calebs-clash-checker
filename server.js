@@ -9,6 +9,10 @@ const ICAL_URL = 'https://icalendar.teamapp.com/clubs/933841/events_subscription
 
 app.use(express.static(path.join(__dirname)));
 
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'caleb-clash-checker (2).html'));
+});
+
 app.get('/soccer', (req, res) => {
   https.get(ICAL_URL, (upstream) => {
     res.setHeader('Content-Type', 'text/calendar; charset=utf-8');
