@@ -207,13 +207,16 @@ function buildCards() {
     const bc={clash:'badge-clash',partial:'badge-partial',ok:'badge-ok',pending:'badge-pending'}[A.type];
     const bt_={clash:'🔴 Hard Clash',partial:'🟡 Partial',ok:'✅ Clear',pending:'⏳ Awaiting'}[A.type];
     const bt=A.bt||getTravelMins(game.venue),bLeave=toMins(game.arrive)-bt;
-    const bRow=`<div class="game-row"><div class="sport-dot dot-bball">🏀</div><div class="game-detail"><div class="game-sport">Basketball · Warwick Senators U12 · FIXED</div><div class="game-time">${fmt12(game.arrive)} – ${fmt12(game.finish)}</div><div class="game-venue">${game.venue}</div><div class="travel-chip">🚗 ~${bt} min · leave by ${fmt12(minsToHHMM(bLeave))}</div></div></div>`;
+    const tipOff=fmt12(minsToHHMM(toMins(game.arrive)+60));
+    const bRow=`<div class="game-row"><div class="sport-dot dot-bball">🏀</div><div class="game-detail"><div class="game-sport">Basketball · Warwick Senators U12 · FIXED</div><div class="game-time">${fmt12(game.arrive)} – ${fmt12(game.finish)} (${tipOff} Tip Off)</div><div class="game-venue">${game.venue}</div><div class="travel-chip">🚗 ~${bt} min · leave by ${fmt12(minsToHHMM(bLeave))}</div></div></div>`;
     let sHTML='';
     if(!soccerLoaded){ sHTML='<div class="soccer-loading">⚽ Loading soccer fixture…</div>'; }
     else if(!soccer.length){ sHTML='<div class="no-soccer-msg">⚽ No soccer fixture published for this Sunday yet</div>'; }
     else for(const r of A.results){
       const s=r.soccer;
-      sHTML+=`<div class="game-row"><div class="sport-dot dot-soccer">⚽</div><div class="game-detail"><div class="game-sport">Soccer · SFC u10 Blue 1 · Flexible</div><div class="game-time">Kickoff ${fmt12(s.startTime)}${s.endTime?' – '+fmt12(s.endTime):' (~60 min)'}</div><div class="game-venue">${s.summary}${s.location?' · '+s.location:''}</div><div class="travel-chip">🚗 ~${r.st} min · leave by ${fmt12(minsToHHMM(r.sLeave))} · arrive ${fmt12(minsToHHMM(r.sNeedBy))} (30 min warmup)</div></div></div>${r.message?`<div class="alert-box ${r.clashType==='clash'?'alert-clash':r.clashType==='partial'?'alert-partial':''}">${r.message}</div>`:''}`;
+      const sArrive=fmt12(minsToHHMM(r.sNeedBy));
+      const sEnd=s.endTime?fmt12(s.endTime):fmt12(minsToHHMM(r.kick+60));
+      sHTML+=`<div class="game-row"><div class="sport-dot dot-soccer">⚽</div><div class="game-detail"><div class="game-sport">Soccer · SFC u10 Blue 1 · Flexible</div><div class="game-time">${sArrive} – ${sEnd} (${fmt12(s.startTime)} Kick Off)</div><div class="game-venue">${s.summary}${s.location?' · '+s.location:''}</div><div class="travel-chip">🚗 ~${r.st} min · leave by ${fmt12(minsToHHMM(r.sLeave))} · arrive ${fmt12(minsToHHMM(r.sNeedBy))} (30 min warmup)</div></div></div>${r.message?`<div class="alert-box ${r.clashType==='clash'?'alert-clash':r.clashType==='partial'?'alert-partial':''}">${r.message}</div>`:''}`;
     }
     const card=`<div class="round-card"><div class="card-accent ${accent}"></div><div class="card-body"><div class="card-header"><div><div class="round-num">Round ${game.rd}</div><div class="round-date">${fmtDate(game.date)}</div></div><span class="badge ${bc}">${bt_}</span></div>${bRow}${sHTML}</div></div>`;
     if(A.type==='clash') clashCards.push(card);
