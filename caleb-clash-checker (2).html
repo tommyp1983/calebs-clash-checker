@@ -134,22 +134,22 @@
 <script>
 const WARMUP = 30;
 const BBALL = [
-  { rd:1,  date:'2025-04-27', arrive:'10:30', finish:'13:00', venue:'Warwick Stadium, Cnr Warwick Rd & Wanneroo Rd, Warwick WA 6024' },
-  { rd:2,  date:'2025-05-04', arrive:'08:00', finish:'10:30', venue:'Arena Joondalup, Kennedya Dr, Joondalup WA 6027' },
-  { rd:3,  date:'2025-05-11', arrive:'10:30', finish:'13:00', venue:'Warwick Stadium, Cnr Warwick Rd & Wanneroo Rd, Warwick WA 6024' },
-  { rd:4,  date:'2025-05-18', arrive:'08:45', finish:'11:15', venue:'Warwick Stadium, Cnr Warwick Rd & Wanneroo Rd, Warwick WA 6024' },
-  { rd:5,  date:'2025-05-25', arrive:'07:00', finish:'09:30', venue:'Morley Sport & Recreation Centre, 12 Wellington Rd, Morley WA 6062' },
-  { rd:6,  date:'2025-06-01', arrive:'07:00', finish:'09:30', venue:'Warwick Stadium, Cnr Warwick Rd & Wanneroo Rd, Warwick WA 6024' },
-  { rd:7,  date:'2025-06-08', arrive:'08:45', finish:'11:15', venue:'Warwick Stadium, Cnr Warwick Rd & Wanneroo Rd, Warwick WA 6024' },
-  { rd:8,  date:'2025-06-15', arrive:'11:00', finish:'13:30', venue:'Lakeside Recreation Centre, 2 Bibra Dr, North Lake WA 6163' },
-  { rd:9,  date:'2025-06-22', arrive:'10:30', finish:'13:00', venue:'Warwick Stadium, Cnr Warwick Rd & Wanneroo Rd, Warwick WA 6024' },
-  { rd:10, date:'2025-06-29', arrive:'10:30', finish:'13:00', venue:'Willetton Basketball Stadium, 58 Burrendah Blvd, Willetton WA 6155' },
-  { rd:11, date:'2025-07-06', arrive:'08:45', finish:'11:15', venue:'Willetton Basketball Stadium, 58 Burrendah Blvd, Willetton WA 6155' },
-  { rd:12, date:'2025-07-27', arrive:'08:45', finish:'11:15', venue:'Warwick Stadium, Cnr Warwick Rd & Wanneroo Rd, Warwick WA 6024' },
-  { rd:13, date:'2025-08-03', arrive:'08:45', finish:'11:15', venue:'Warwick Stadium, Cnr Warwick Rd & Wanneroo Rd, Warwick WA 6024' },
-  { rd:14, date:'2025-08-10', arrive:'13:15', finish:'15:45', venue:'Arena Joondalup, Kennedya Dr, Joondalup WA 6027' },
-  { rd:15, date:'2025-08-17', arrive:'10:30', finish:'13:00', venue:'Warwick Stadium, Cnr Warwick Rd & Wanneroo Rd, Warwick WA 6024' },
-  { rd:16, date:'2025-08-24', arrive:'08:00', finish:'10:30', venue:'Arena Joondalup, Kennedya Dr, Joondalup WA 6027' },
+  { rd:1,  date:'2026-04-27', arrive:'10:30', finish:'13:00', venue:'Warwick Stadium, Cnr Warwick Rd & Wanneroo Rd, Warwick WA 6024' },
+  { rd:2,  date:'2026-05-04', arrive:'08:00', finish:'10:30', venue:'Arena Joondalup, Kennedya Dr, Joondalup WA 6027' },
+  { rd:3,  date:'2026-05-11', arrive:'10:30', finish:'13:00', venue:'Warwick Stadium, Cnr Warwick Rd & Wanneroo Rd, Warwick WA 6024' },
+  { rd:4,  date:'2026-05-18', arrive:'08:45', finish:'11:15', venue:'Warwick Stadium, Cnr Warwick Rd & Wanneroo Rd, Warwick WA 6024' },
+  { rd:5,  date:'2026-05-25', arrive:'07:00', finish:'09:30', venue:'Morley Sport & Recreation Centre, 12 Wellington Rd, Morley WA 6062' },
+  { rd:6,  date:'2026-06-01', arrive:'07:00', finish:'09:30', venue:'Warwick Stadium, Cnr Warwick Rd & Wanneroo Rd, Warwick WA 6024' },
+  { rd:7,  date:'2026-06-08', arrive:'08:45', finish:'11:15', venue:'Warwick Stadium, Cnr Warwick Rd & Wanneroo Rd, Warwick WA 6024' },
+  { rd:8,  date:'2026-06-15', arrive:'11:00', finish:'13:30', venue:'Lakeside Recreation Centre, 2 Bibra Dr, North Lake WA 6163' },
+  { rd:9,  date:'2026-06-22', arrive:'10:30', finish:'13:00', venue:'Warwick Stadium, Cnr Warwick Rd & Wanneroo Rd, Warwick WA 6024' },
+  { rd:10, date:'2026-06-29', arrive:'10:30', finish:'13:00', venue:'Willetton Basketball Stadium, 58 Burrendah Blvd, Willetton WA 6155' },
+  { rd:11, date:'2026-07-06', arrive:'08:45', finish:'11:15', venue:'Willetton Basketball Stadium, 58 Burrendah Blvd, Willetton WA 6155' },
+  { rd:12, date:'2026-07-27', arrive:'08:45', finish:'11:15', venue:'Warwick Stadium, Cnr Warwick Rd & Wanneroo Rd, Warwick WA 6024' },
+  { rd:13, date:'2026-08-03', arrive:'08:45', finish:'11:15', venue:'Warwick Stadium, Cnr Warwick Rd & Wanneroo Rd, Warwick WA 6024' },
+  { rd:14, date:'2026-08-10', arrive:'13:15', finish:'15:45', venue:'Arena Joondalup, Kennedya Dr, Joondalup WA 6027' },
+  { rd:15, date:'2026-08-17', arrive:'10:30', finish:'13:00', venue:'Warwick Stadium, Cnr Warwick Rd & Wanneroo Rd, Warwick WA 6024' },
+  { rd:16, date:'2026-08-24', arrive:'08:00', finish:'10:30', venue:'Arena Joondalup, Kennedya Dr, Joondalup WA 6027' },
 ];
 
 const KNOWN_TRAVEL = { Warwick:12, Joondalup:18, Morley:20, Lakeside:35, Willetton:35 };
