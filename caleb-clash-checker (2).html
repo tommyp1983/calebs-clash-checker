@@ -199,7 +199,7 @@ let soccerByDate={},soccerLoaded=false;
 
 function buildCards() {
   let counts={clash:0,partial:0,ok:0,pending:0};
-  const clashCards=[],partialCards=[],allCards=[];
+  const allCards=[];
   for(const game of BBALL){
     const soccer=soccerByDate[game.date]||[],A=analyse(game,soccer);
     counts[A.type]++;
@@ -222,8 +222,6 @@ function buildCards() {
       sHTML+=`<div class="game-row"><div class="sport-dot dot-soccer">⚽</div><div class="game-detail"><div class="game-sport">Soccer · SFC u10 Blue 1 · Flexible</div><div class="game-time">${sTimeDisplay}</div><div class="game-venue">${s.summary}${s.location?' · '+s.location:''}</div><div class="travel-chip">🚗 ~${r.st} min · leave by ${fmt12(minsToHHMM(r.sLeave))} · arrive ${fmt12(minsToHHMM(r.sNeedBy))} (30 min warmup)</div></div></div>${r.message?`<div class="alert-box ${r.clashType==='clash'?'alert-clash':r.clashType==='partial'?'alert-partial':''}">${r.message}</div>`:''}`;
     }
     const card=`<div class="round-card"><div class="card-accent ${accent}"></div><div class="card-body"><div class="card-header"><div><div class="round-num">Round ${game.rd}</div><div class="round-date">${fmtDate(game.date)}</div></div><span class="badge ${bc}">${bt_}</span></div>${bRow}${sHTML}</div></div>`;
-    if(A.type==='clash') clashCards.push(card);
-    if(A.type==='partial') partialCards.push(card);
     allCards.push(card);
   }
   document.getElementById('numClashes').textContent=counts.clash;
@@ -231,9 +229,7 @@ function buildCards() {
   document.getElementById('numClear').textContent=counts.ok;
   document.getElementById('numPending').textContent=counts.pending;
   let html=`<div class="legend"><div class="legend-row"><div class="ldot ldot-clash"></div><span><strong style="color:var(--text)">Hard Clash</strong> — basketball is fixed; Caleb misses all of soccer</span></div><div class="legend-row"><div class="ldot ldot-partial"></div><span><strong style="color:var(--text)">Partial Clash</strong> — Caleb can join soccer late after basketball</span></div><div class="legend-row"><div class="ldot ldot-ok"></div><span><strong style="color:var(--text)">Clear</strong> — both games fit including travel</span></div><div class="legend-row"><div class="ldot ldot-pending"></div><span><strong style="color:var(--text)">Awaiting</strong> — soccer fixture not yet published</span></div></div>`;
-  if(clashCards.length)   html+=`<div class="section-label">🔴 Hard Clashes</div>`+clashCards.join('')+`<div class="divider-line"></div>`;
-  if(partialCards.length) html+=`<div class="section-label">🟡 Partial Clashes</div>`+partialCards.join('')+`<div class="divider-line"></div>`;
-  html+=`<div class="section-label">All Rounds</div>`+allCards.join('');
+  html+=allCards.join('');
   document.getElementById('content').innerHTML=html;
 }
 
