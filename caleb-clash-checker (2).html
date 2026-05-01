@@ -214,9 +214,12 @@ function buildCards() {
     else if(!soccer.length){ sHTML='<div class="no-soccer-msg">⚽ No soccer fixture published for this Sunday yet</div>'; }
     else for(const r of A.results){
       const s=r.soccer;
+      const duration=s.endTime?toMins(s.endTime)-r.kick:60;
+      const placeholderTime=duration>180;
       const sArrive=fmt12(minsToHHMM(r.sNeedBy));
       const sEnd=s.endTime?fmt12(s.endTime):fmt12(minsToHHMM(r.kick+60));
-      sHTML+=`<div class="game-row"><div class="sport-dot dot-soccer">⚽</div><div class="game-detail"><div class="game-sport">Soccer · SFC u10 Blue 1 · Flexible</div><div class="game-time">${sArrive} – ${sEnd} (${fmt12(s.startTime)} Kick Off)</div><div class="game-venue">${s.summary}${s.location?' · '+s.location:''}</div><div class="travel-chip">🚗 ~${r.st} min · leave by ${fmt12(minsToHHMM(r.sLeave))} · arrive ${fmt12(minsToHHMM(r.sNeedBy))} (30 min warmup)</div></div></div>${r.message?`<div class="alert-box ${r.clashType==='clash'?'alert-clash':r.clashType==='partial'?'alert-partial':''}">${r.message}</div>`:''}`;
+      const sTimeDisplay=placeholderTime?'⏰ Game time not yet released':`${sArrive} – ${sEnd} (${fmt12(s.startTime)} Kick Off)`;
+      sHTML+=`<div class="game-row"><div class="sport-dot dot-soccer">⚽</div><div class="game-detail"><div class="game-sport">Soccer · SFC u10 Blue 1 · Flexible</div><div class="game-time">${sTimeDisplay}</div><div class="game-venue">${s.summary}${s.location?' · '+s.location:''}</div><div class="travel-chip">🚗 ~${r.st} min · leave by ${fmt12(minsToHHMM(r.sLeave))} · arrive ${fmt12(minsToHHMM(r.sNeedBy))} (30 min warmup)</div></div></div>${r.message?`<div class="alert-box ${r.clashType==='clash'?'alert-clash':r.clashType==='partial'?'alert-partial':''}">${r.message}</div>`:''}`;
     }
     const card=`<div class="round-card"><div class="card-accent ${accent}"></div><div class="card-body"><div class="card-header"><div><div class="round-num">Round ${game.rd}</div><div class="round-date">${fmtDate(game.date)}</div></div><span class="badge ${bc}">${bt_}</span></div>${bRow}${sHTML}</div></div>`;
     if(A.type==='clash') clashCards.push(card);
