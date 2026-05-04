@@ -207,7 +207,7 @@ function buildCards() {
     const bc={clash:'badge-clash',partial:'badge-partial',ok:'badge-ok',pending:'badge-pending'}[A.type];
     const bt_={clash:'🔴 Hard Clash',partial:'🟡 Partial',ok:'✅ Clear',pending:'⏳ Awaiting'}[A.type];
     const bt=A.bt||getTravelMins(game.venue),bLeave=toMins(game.arrive)-bt;
-    const tipOff=fmt12(minsToHHMM(toMins(game.arrive)+60));
+    const tipOff=fmt12(minsToHHMM(toMins(game.arrive)+30));
     const bRow=`<div class="game-row"><div class="sport-dot dot-bball">🏀</div><div class="game-detail"><div class="game-sport">Basketball · Warwick Senators U12 · FIXED</div><div class="game-time">${fmt12(game.arrive)} – ${fmt12(game.finish)} (${tipOff} Tip Off)</div><div class="game-venue">${game.venue}</div><div class="travel-chip">🚗 ~${bt} min · leave by ${fmt12(minsToHHMM(bLeave))}</div></div></div>`;
     let sHTML='';
     if(!soccerLoaded){ sHTML='<div class="soccer-loading">⚽ Loading soccer fixture…</div>'; }
