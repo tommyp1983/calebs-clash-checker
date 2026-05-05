@@ -22,8 +22,7 @@ const VENUES = {
 const VENUE_KEYS = Object.keys(VENUES);
 
 // Fallback matrix (minutes) — used if ORS API is unavailable
-// travelMatrix[from][to] = minutes
-let travelMatrix = {
+const fallbackMatrix = {
   Home:      { Home:0,  Warwick:12, Joondalup:20, Morley:25, Lakeside:38, Willetton:38, Sorrento:5,  Carine:8  },
   Warwick:   { Home:12, Warwick:0,  Joondalup:22, Morley:18, Lakeside:32, Willetton:30, Sorrento:12, Carine:10 },
   Joondalup: { Home:20, Warwick:22, Joondalup:0,  Morley:30, Lakeside:45, Willetton:45, Sorrento:20, Carine:18 },
@@ -33,6 +32,10 @@ let travelMatrix = {
   Sorrento:  { Home:5,  Warwick:12, Joondalup:20, Morley:25, Lakeside:38, Willetton:35, Sorrento:0,  Carine:8  },
   Carine:    { Home:8,  Warwick:10, Joondalup:18, Morley:22, Lakeside:35, Willetton:32, Sorrento:8,  Carine:0  },
 };
+
+// Simple cache — store result + timestamp
+let matrixCache = { data: null, fetchedAt: 0 };
+const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
 
 function orsPost(body) {
   return new Promise((resolve, reject) => {
@@ -59,35 +62,46 @@ function orsPost(body) {
 }
 
 async function fetchTravelMatrix() {
+  // Return cached result if still fresh
+  if (matrixCache.data && Date.now() - matrixCache.fetchedAt < CACHE_TTL_MS) {
+    return matrixCache.data;
+  }
+
   if (!process.env.ORS_API_KEY) {
     console.log('No ORS_API_KEY — using fallback travel matrix');
-    return;
+    return fallbackMatrix;
   }
 
   const coords = VENUE_KEYS.map(k => VENUES[k]);
+  const indices = Array.from({ length: coords.length }, (_, i) => i);
 
   try {
     const result = await orsPost({
       locations: coords,
-      sources: Array.from({ length: coords.length }, (_, i) => i),
-      destinations: Array.from({ length: coords.length }, (_, i) => i),
+      sources: indices,
+      destinations: indices,
       metrics: ['duration'],
     });
 
     if (result.status === 200) {
       const json = JSON.parse(result.body);
-      // durations[i][j] = seconds from venue i to venue j
+      const matrix = {};
       VENUE_KEYS.forEach((fromKey, i) => {
+        matrix[fromKey] = {};
         VENUE_KEYS.forEach((toKey, j) => {
-          travelMatrix[fromKey][toKey] = Math.ceil(json.durations[i][j] / 60);
+          matrix[fromKey][toKey] = Math.ceil(json.durations[i][j] / 60);
         });
       });
       console.log('✅ ORS travel matrix loaded');
+      matrixCache = { data: matrix, fetchedAt: Date.now() };
+      return matrix;
     } else {
       console.warn('ORS error:', result.status, result.body.slice(0, 200));
+      return fallbackMatrix;
     }
   } catch (err) {
     console.warn('ORS failed, using fallback matrix:', err.message);
+    return fallbackMatrix;
   }
 }
 
@@ -118,11 +132,10 @@ app.get('/soccer', (req, res) => {
 });
 
 // Returns full venue-to-venue matrix so the frontend can look up any pair
-app.get('/travel-times', (req, res) => {
-  res.json(travelMatrix);
+app.get('/travel-times', async (req, res) => {
+  const matrix = await fetchTravelMatrix();
+  res.json(matrix);
 });
-
-fetchTravelMatrix();
 
 if (require.main === module) {
   app.listen(PORT, () => {
