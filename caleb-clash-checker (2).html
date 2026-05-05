@@ -133,6 +133,7 @@
 
 <script>
 const WARMUP = 30;
+const TRANSITION = 5; // mins to get off field and into car
 const BBALL = [
   { rd:1,  date:'2026-04-26', arrive:'11:00', finish:'13:00', venue:'Warwick Stadium, Cnr Warwick Rd & Wanneroo Rd, Warwick WA 6024' },
   { rd:2,  date:'2026-05-03', arrive:'08:30', finish:'10:30', venue:'Arena Joondalup, Kennedya Dr, Joondalup WA 6027' },
@@ -183,13 +184,13 @@ function analyse(game,soccer) {
     const overlaps=bLeave<sEnd&&sLeave<bEnd;
     let clashType='ok',message='';
     if(overlaps){
-      const ab=bEnd+st,as2=sEnd+bt;
+      const ab=bEnd+TRANSITION+st,as2=sEnd+TRANSITION+bt;
       // Soccer starts before basketball leave time — Caleb can play the start of soccer
-      const minsOfSoccerFirst = kick < bLeave ? bLeave - kick : 0;
-      if(ab<=sNeedBy){ clashType='ok'; message='✅ Tight but fine — basketball ends '+fmt12(game.finish)+', ~'+st+' min drive, arrive soccer '+fmt12(minsToHHMM(ab))+' (kickoff '+fmt12(s.startTime)+').'; }
+      const minsOfSoccerFirst = kick < bLeave ? (bLeave - TRANSITION) - kick : 0;
+      if(ab<=sNeedBy){ clashType='ok'; message='✅ Tight but fine — basketball ends '+fmt12(game.finish)+', ~'+st+' min drive (+'+TRANSITION+' min transition), arrive soccer '+fmt12(minsToHHMM(ab))+' (kickoff '+fmt12(s.startTime)+').'; }
       else if(as2<=bStart){ clashType='ok'; message='✅ Soccer finishes in time for basketball.'; }
-      else if(minsOfSoccerFirst>=20){ clashType='partial'; message='🟡 Soccer kicks off at '+fmt12(s.startTime)+'. Caleb can play the first ~'+minsOfSoccerFirst+' min of soccer before leaving at '+fmt12(minsToHHMM(bLeave))+' to reach basketball by '+fmt12(game.arrive)+'.'; }
-      else if(ab<sEnd){ clashType='partial'; message='🟡 Basketball ends '+fmt12(game.finish)+'. After ~'+st+' min drive, Caleb arrives soccer ~'+fmt12(minsToHHMM(ab))+' — '+(ab-kick)+' min into the game. Can play the rest (coach permitting).'; }
+      else if(minsOfSoccerFirst>=20){ clashType='partial'; message='🟡 Soccer kicks off at '+fmt12(s.startTime)+'. Caleb can play the first ~'+minsOfSoccerFirst+' min before leaving at '+fmt12(minsToHHMM(bLeave-TRANSITION))+' (inc. '+TRANSITION+' min to car) to reach basketball by '+fmt12(game.arrive)+'.'; }
+      else if(ab<sEnd){ clashType='partial'; message='🟡 Basketball ends '+fmt12(game.finish)+'. After '+TRANSITION+' min transition + ~'+st+' min drive, Caleb arrives soccer ~'+fmt12(minsToHHMM(ab))+' — '+(ab-kick)+' min into the game. Can play the rest (coach permitting).'; }
       else{ clashType='clash'; message='🔴 Basketball runs until '+fmt12(game.finish)+'. Caleb would miss all of soccer (kickoff '+fmt12(s.startTime)+', ends ~'+fmt12(minsToHHMM(sEnd))+').'; }
     }
     return {soccer:s,clashType,message,bt,st,bLeave,sLeave,sNeedBy,kick,sEnd};
