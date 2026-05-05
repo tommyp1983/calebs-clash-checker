@@ -178,7 +178,14 @@ function getVenueToVenue(from, to) { const fk=matchVenue(from),tk=matchVenue(to)
 async function loadTravelTimes() {
   try {
     const res = await fetch('/travel-times', { signal: AbortSignal.timeout(5000) });
-    if(res.ok) { travelMatrix = await res.json(); buildCards(); }
+    if(res.ok) {
+      const data = await res.json();
+      // Only use if it's the full nested matrix (has a Home key with nested object)
+      if(data.Home && typeof data.Home === 'object') {
+        travelMatrix = data;
+        buildCards();
+      }
+    }
   } catch(e) { console.log('Using fallback travel matrix'); }
 }
 function toMins(t) { if(!t) return 0; const[h,m]=t.split(':').map(Number); return h*60+m; }
