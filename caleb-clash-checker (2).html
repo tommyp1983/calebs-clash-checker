@@ -153,9 +153,16 @@ const BBALL = [
   { rd:16, date:'2026-08-23', arrive:'08:30', finish:'10:30', venue:'Arena Joondalup, Kennedya Dr, Joondalup WA 6027' },
 ];
 
-const KNOWN_TRAVEL = { Warwick:12, Joondalup:18, Morley:20, Lakeside:35, Willetton:35 };
+let KNOWN_TRAVEL = { Warwick:12, Joondalup:20, Morley:25, Lakeside:38, Willetton:38, Sorrento:5, Carine:8 };
 function getTravelMins(v) { for(const[k,m] of Object.entries(KNOWN_TRAVEL)){ if(v.includes(k)) return m; } return 20; }
-function getSoccerTravel(l) { if(!l) return 10; if(l.toLowerCase().includes('sorrento')||l.toLowerCase().includes('carine')) return 8; return 15; }
+function getSoccerTravel(l) { if(!l) return 15; for(const[k,m] of Object.entries(KNOWN_TRAVEL)){ if(l.toLowerCase().includes(k.toLowerCase())) return m; } return 15; }
+
+async function loadTravelTimes() {
+  try {
+    const res = await fetch('/travel-times', { signal: AbortSignal.timeout(5000) });
+    if(res.ok) { KNOWN_TRAVEL = await res.json(); buildCards(); }
+  } catch(e) { console.log('Using fallback travel times'); }
+}
 function toMins(t) { if(!t) return 0; const[h,m]=t.split(':').map(Number); return h*60+m; }
 function minsToHHMM(m) { return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0'); }
 function fmt12(t) { if(!t) return '?'; let[h,m]=t.split(':').map(Number); const ap=h>=12?'pm':'am'; if(h>12)h-=12; if(h===0)h=12; return h+':'+String(m).padStart(2,'0')+ap; }
@@ -380,6 +387,7 @@ function processSoccer(text) {
 
 buildCards();
 fetchSoccer();
+loadTravelTimes();
 </script>
 </body>
 </html>
