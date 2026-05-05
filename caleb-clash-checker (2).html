@@ -171,9 +171,10 @@ function matchVenue(str) {
   for(const k of Object.keys(travelMatrix)) { if(lower.includes(k.toLowerCase())) return k; }
   return null;
 }
-function getTravelMins(v) { const k=matchVenue(v); return k&&travelMatrix.Home[k]!=null ? travelMatrix.Home[k] : 20; }
-function getSoccerTravel(l) { const k=matchVenue(l); return k&&travelMatrix.Home[k]!=null ? travelMatrix.Home[k] : 15; }
-function getVenueToVenue(from, to) { const fk=matchVenue(from),tk=matchVenue(to); return (fk&&tk&&travelMatrix[fk]?.[tk]) ?? 20; }
+function num(v, fallback) { return typeof v === 'number' && isFinite(v) ? v : fallback; }
+function getTravelMins(v)          { const k=matchVenue(v);  return num(travelMatrix.Home?.[k], 20); }
+function getSoccerTravel(l)        { const k=matchVenue(l);  return num(travelMatrix.Home?.[k], 15); }
+function getVenueToVenue(from, to) { const fk=matchVenue(from),tk=matchVenue(to); return num(travelMatrix[fk]?.[tk], 20); }
 
 async function loadTravelTimes() {
   try {
