@@ -184,8 +184,11 @@ function analyse(game,soccer) {
     let clashType='ok',message='';
     if(overlaps){
       const ab=bEnd+st,as2=sEnd+bt;
+      // Soccer starts before basketball leave time — Caleb can play the start of soccer
+      const minsOfSoccerFirst = kick < bLeave ? bLeave - kick : 0;
       if(ab<=sNeedBy){ clashType='ok'; message='✅ Tight but fine — basketball ends '+fmt12(game.finish)+', ~'+st+' min drive, arrive soccer '+fmt12(minsToHHMM(ab))+' (kickoff '+fmt12(s.startTime)+').'; }
       else if(as2<=bStart){ clashType='ok'; message='✅ Soccer finishes in time for basketball.'; }
+      else if(minsOfSoccerFirst>=20){ clashType='partial'; message='🟡 Soccer kicks off at '+fmt12(s.startTime)+'. Caleb can play the first ~'+minsOfSoccerFirst+' min of soccer before leaving at '+fmt12(minsToHHMM(bLeave))+' to reach basketball by '+fmt12(game.arrive)+'.'; }
       else if(ab<sEnd){ clashType='partial'; message='🟡 Basketball ends '+fmt12(game.finish)+'. After ~'+st+' min drive, Caleb arrives soccer ~'+fmt12(minsToHHMM(ab))+' — '+(ab-kick)+' min into the game. Can play the rest (coach permitting).'; }
       else{ clashType='clash'; message='🔴 Basketball runs until '+fmt12(game.finish)+'. Caleb would miss all of soccer (kickoff '+fmt12(s.startTime)+', ends ~'+fmt12(minsToHHMM(sEnd))+').'; }
     }
