@@ -153,15 +153,33 @@ const BBALL = [
   { rd:16, date:'2026-08-23', arrive:'08:30', finish:'10:30', venue:'Arena Joondalup, Kennedya Dr, Joondalup WA 6027' },
 ];
 
-let KNOWN_TRAVEL = { Warwick:12, Joondalup:20, Morley:25, Lakeside:38, Willetton:38, Sorrento:5, Carine:8 };
-function getTravelMins(v) { for(const[k,m] of Object.entries(KNOWN_TRAVEL)){ if(v.includes(k)) return m; } return 20; }
-function getSoccerTravel(l) { if(!l) return 15; for(const[k,m] of Object.entries(KNOWN_TRAVEL)){ if(l.toLowerCase().includes(k.toLowerCase())) return m; } return 15; }
+// travelMatrix[from][to] = minutes — loaded from server, fallback inline
+let travelMatrix = {
+  Home:      { Home:0,  Warwick:12, Joondalup:20, Morley:25, Lakeside:38, Willetton:38, Sorrento:5,  Carine:8  },
+  Warwick:   { Home:12, Warwick:0,  Joondalup:22, Morley:18, Lakeside:32, Willetton:30, Sorrento:12, Carine:10 },
+  Joondalup: { Home:20, Warwick:22, Joondalup:0,  Morley:30, Lakeside:45, Willetton:45, Sorrento:20, Carine:18 },
+  Morley:    { Home:25, Warwick:18, Joondalup:30, Morley:0,  Lakeside:35, Willetton:32, Sorrento:25, Carine:22 },
+  Lakeside:  { Home:38, Warwick:32, Joondalup:45, Morley:35, Lakeside:0,  Willetton:15, Sorrento:38, Carine:35 },
+  Willetton: { Home:38, Warwick:30, Joondalup:45, Morley:32, Lakeside:15, Willetton:0,  Sorrento:35, Carine:32 },
+  Sorrento:  { Home:5,  Warwick:12, Joondalup:20, Morley:25, Lakeside:38, Willetton:35, Sorrento:0,  Carine:8  },
+  Carine:    { Home:8,  Warwick:10, Joondalup:18, Morley:22, Lakeside:35, Willetton:32, Sorrento:8,  Carine:0  },
+};
+
+function matchVenue(str) {
+  if(!str) return null;
+  const lower = str.toLowerCase();
+  for(const k of Object.keys(travelMatrix)) { if(lower.includes(k.toLowerCase())) return k; }
+  return null;
+}
+function getTravelMins(v) { const k=matchVenue(v); return k&&travelMatrix.Home[k]!=null ? travelMatrix.Home[k] : 20; }
+function getSoccerTravel(l) { const k=matchVenue(l); return k&&travelMatrix.Home[k]!=null ? travelMatrix.Home[k] : 15; }
+function getVenueToVenue(from, to) { const fk=matchVenue(from),tk=matchVenue(to); return (fk&&tk&&travelMatrix[fk]?.[tk]) ?? 20; }
 
 async function loadTravelTimes() {
   try {
     const res = await fetch('/travel-times', { signal: AbortSignal.timeout(5000) });
-    if(res.ok) { KNOWN_TRAVEL = await res.json(); buildCards(); }
-  } catch(e) { console.log('Using fallback travel times'); }
+    if(res.ok) { travelMatrix = await res.json(); buildCards(); }
+  } catch(e) { console.log('Using fallback travel matrix'); }
 }
 function toMins(t) { if(!t) return 0; const[h,m]=t.split(':').map(Number); return h*60+m; }
 function minsToHHMM(m) { return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0'); }
@@ -188,16 +206,20 @@ function analyse(game,soccer) {
   const bt=getTravelMins(game.venue),bLeave=toMins(game.arrive)-bt,bStart=toMins(game.arrive),bEnd=toMins(game.finish);
   const results=soccer.map(s=>{
     const st=getSoccerTravel(s.location),kick=toMins(s.startTime),sNeedBy=kick-WARMUP,sLeave=sNeedBy-st,sEnd=s.endTime?toMins(s.endTime):kick+60;
+    // Venue-to-venue travel (the leg between the two games)
+    const s2b=getVenueToVenue(s.location,game.venue); // soccer venue → basketball venue
+    const b2s=getVenueToVenue(game.venue,s.location); // basketball venue → soccer venue
     const overlaps=bLeave<sEnd&&sLeave<bEnd;
     let clashType='ok',message='';
     if(overlaps){
-      const ab=bEnd+TRANSITION+st,as2=sEnd+TRANSITION+bt;
+      const ab=bEnd+TRANSITION+b2s,as2=sEnd+TRANSITION+s2b;
       // Soccer starts before basketball leave time — Caleb can play the start of soccer
-      const minsOfSoccerFirst = kick < bLeave ? (bLeave - TRANSITION) - kick : 0;
-      if(ab<=sNeedBy){ clashType='ok'; message='✅ Tight but fine — basketball ends '+fmt12(game.finish)+', ~'+st+' min drive (+'+TRANSITION+' min transition), arrive soccer '+fmt12(minsToHHMM(ab))+' (kickoff '+fmt12(s.startTime)+').'; }
+      const soccerLeave=bStart-TRANSITION-s2b; // latest Caleb can leave soccer to reach basketball
+      const minsOfSoccerFirst = kick < soccerLeave ? soccerLeave - kick : 0;
+      if(ab<=sNeedBy){ clashType='ok'; message='✅ Tight but fine — basketball ends '+fmt12(game.finish)+', ~'+b2s+' min drive (+'+TRANSITION+' min transition), arrive soccer '+fmt12(minsToHHMM(ab))+' (kickoff '+fmt12(s.startTime)+').'; }
       else if(as2<=bStart){ clashType='ok'; message='✅ Soccer finishes in time for basketball.'; }
-      else if(minsOfSoccerFirst>=20){ clashType='partial'; message='🟡 Soccer kicks off at '+fmt12(s.startTime)+'. Caleb can play the first ~'+minsOfSoccerFirst+' min before leaving at '+fmt12(minsToHHMM(bLeave-TRANSITION))+' (inc. '+TRANSITION+' min to car) to reach basketball by '+fmt12(game.arrive)+'.'; }
-      else if(ab<sEnd){ clashType='partial'; message='🟡 Basketball ends '+fmt12(game.finish)+'. After '+TRANSITION+' min transition + ~'+st+' min drive, Caleb arrives soccer ~'+fmt12(minsToHHMM(ab))+' — '+(ab-kick)+' min into the game. Can play the rest (coach permitting).'; }
+      else if(minsOfSoccerFirst>=20){ clashType='partial'; message='🟡 Soccer kicks off at '+fmt12(s.startTime)+'. Caleb can play the first ~'+minsOfSoccerFirst+' min before leaving at '+fmt12(minsToHHMM(soccerLeave))+' (inc. '+TRANSITION+' min to car + '+s2b+' min drive) to reach basketball by '+fmt12(game.arrive)+'.'; }
+      else if(ab<sEnd){ clashType='partial'; message='🟡 Basketball ends '+fmt12(game.finish)+'. After '+TRANSITION+' min transition + ~'+b2s+' min drive, Caleb arrives soccer ~'+fmt12(minsToHHMM(ab))+' — '+(ab-kick)+' min into the game. Can play the rest (coach permitting).'; }
       else{ clashType='clash'; message='🔴 Basketball runs until '+fmt12(game.finish)+'. Caleb would miss all of soccer (kickoff '+fmt12(s.startTime)+', ends ~'+fmt12(minsToHHMM(sEnd))+').'; }
     }
     return {soccer:s,clashType,message,bt,st,bLeave,sLeave,sNeedBy,kick,sEnd};
